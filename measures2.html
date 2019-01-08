@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Измерения</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css"
+          integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+            integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+            crossorigin="anonymous"></script>
+
+</head>
+<body>
+
+
+<div>
+    <ul class="nav nav-tabs" id="measures-tabs" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" id="mass-tab" data-toggle="tab" href="#mass" role="tab" aria-controls="mass-tab"
+               aria-selected="true">По массе</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="diam-tab" data-toggle="tab" href="#rad" role="tab" aria-controls="rad"
+               aria-selected="false">По диаметру</a>
+        </li>
+    </ul>
+    <div class="tab-content" id="measures-tab-contents">
+        <div class="tab-pane fade active" id="mass" role="tabpanel" aria-labelledby="mass-tab">
+            <div class="row">
+                <div class="col-sm-6 col-sm-offset-1">
+                    <form>
+                        <div class="form-group row">
+                            <label for="etalon-mass" class="col-sm-2 col-form-label">Эталон</label>
+                            <div class="col-sm-6">
+                                <input type="number" class="form-control" id="etalon-mass" placeholder="0">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="desired-mass" class="col-sm-2 col-form-label">Желаемая</label>
+                            <div class="col-sm-6">
+                                <input type="number" class="form-control" id="desired-mass" placeholder="0">
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="koeff-mass" class="col-sm-2 col-form-label">Коэффициент</label>
+                            <div class="col-sm-6">
+                                <input type="number" class="form-control" id="koeff-mass" placeholder="0" disabled>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <label class="col-sm-4 col-form-label">Ингридиенты (рецепт), масса</label>
+                            <label class="col-sm-4 col-form-label">Факт</label>
+                        </div>
+                        <div id="measure-lines-mass">
+                        </div>
+                        <br>
+                        <button type="button" id="add-line-mass" class="btn btn-primary">Добавить</button>
+
+
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="tab-pane fade" id="rad" role="tabpanel" aria-labelledby="rad-tab">
+            <div class="row">
+                <div class="col-sm-6 col-sm-offset-1">
+                    <form>
+                        <div class="form-group row">
+                            <label for="etalon-diam" class="col-sm-2 col-form-label">Эталон</label>
+                            <div class="col-sm-6">
+                                <input type="number" class="form-control" id="etalon-diam" placeholder="0">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="desired-diam" class="col-sm-2 col-form-label">Желаемый</label>
+                            <div class="col-sm-6">
+                                <input type="number" class="form-control" id="desired-diam" placeholder="0">
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="koeff-diam" class="col-sm-2 col-form-label">Коэффициент</label>
+                            <div class="col-sm-6">
+                                <input type="number" class="form-control" id="koeff-diam" placeholder="0" disabled>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <label class="col-sm-4 col-form-label">Ингридиенты (рецепт), масса</label>
+                            <label class="col-sm-4 col-form-label">Факт</label>
+                        </div>
+                        <div id="measure-lines-diam">
+                        </div>
+                        <br>
+                        <button type="button" id="add-line-diam" class="btn btn-primary">Добавить</button>
+
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    let scope = 'mass';
+
+    let getKoef = () => {
+        let k = $('#etalon-' + scope).val();
+
+        if (!k) {
+            return 0;
+        }
+
+        let d = $('#desired-' + scope).val();
+
+        if (!d) {
+            return 0;
+        }
+
+        if (scope === 'diam') {
+            return Math.pow(k/d, 2);
+        }
+
+        return k / d;
+    };
+
+    let formatNumber = v => parseFloat(v).toFixed(2);
+
+    let koefChanged = () => {
+        let k = getKoef();
+
+        $('#koeff-' + scope).val(formatNumber(k));
+
+        if (k > 0) {
+            k = 1 / k;
+        }
+
+        $('.measure-line-etalon-' + scope).each(function () {
+                $(this).parent().parent().find('.measure-line-fact-' + scope).val(formatNumber($(this).val() * k));
+            }
+        );
+    };
+
+    let addLine = (pscope) => {
+
+        pscope = !!pscope ? pscope : scope;
+
+        $('#measure-lines-' + pscope).append('<div class="row">\n' +
+            '                                <div class="col-sm-4">\n' +
+            '                                    <input type="number" class="form-control measure-line-etalon-' + pscope + '" placeholder="0">\n' +
+            '                                </div>\n' +
+            '                                <div class="col-sm-4">\n' +
+            '                                    <input type="number" class="form-control measure-line-fact-' + pscope + '" placeholder="0"\n' +
+            '                                           disabled>\n' +
+            '                                </div>\n' +
+            '                            </div>');
+
+        setTimeout(() => {
+            $('.measure-line-etalon-' + pscope).change(() => koefChanged());
+        }, 0);
+    };
+
+    let linesCount = 7;
+
+    while (linesCount > 0) {
+        addLine('diam');
+        addLine('mass');
+        linesCount--;
+    }
+
+    $('#etalon-mass').change(() => koefChanged());
+    $('#desired-mass').change(() => koefChanged());
+    $('#add-line-mass').click(() => addLine());
+
+    $('#etalon-diam').change(() => koefChanged());
+    $('#desired-diam').change(() => koefChanged());
+    $('#add-line-diam').click(() => addLine());
+
+    $('#diam-tab').click(() => scope = 'diam');
+    $('#mass-tab').click(() => scope = 'mass');
+
+</script>
+
+</body>
+</html>
